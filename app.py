@@ -37,10 +37,8 @@ def crear_json_desde_excel(file):
     consultas_df = pd.read_excel(xls, sheet_name="consultas")
     procedimientos_df = pd.read_excel(xls, sheet_name="procedimientos")
 
-    # Obtener datos de la hoja "transaccion" (asumimos un solo registro)
     transaccion_data = transaccion_df.iloc[0]
 
-    # Armar estructura base
     resultado = {
         "numDocumentoIdObligado": str(transaccion_data["numDocumentoIdObligado"]),
         "numFactura": str(transaccion_data["numFactura"]),
@@ -68,7 +66,6 @@ def crear_json_desde_excel(file):
             "servicios": {},
         }
 
-        # Consultas para este usuario
         user_consultas = consultas_df[consultas_df["numDocumentoIdentificacion"].astype(str) == num_doc]
         if not user_consultas.empty:
             usuario["servicios"]["consultas"] = []
@@ -95,7 +92,6 @@ def crear_json_desde_excel(file):
                 }
                 usuario["servicios"]["consultas"].append(consulta)
 
-        # Procedimientos para este usuario
         user_procedimientos = procedimientos_df[procedimientos_df["numDocumentoIdentificacion"].astype(str) == num_doc]
         if not user_procedimientos.empty:
             usuario["procedimientos"] = []
@@ -129,7 +125,6 @@ def crear_json_desde_excel(file):
     return resultado
 
 st.subheader("📄 Descargar plantilla Excel")
-# Definimos las columnas de cada hoja
 columnas_transaccion = [
     "numDocumentoIdObligado", "numFactura", "tipoNota", "numNota"
 ]
@@ -157,7 +152,6 @@ columnas_procedimientos = [
     "numFEVPagoModerador"
 ]
 
-# Creamos DataFrames vacíos para cada hoja
 transaccion_df = pd.DataFrame(columns=columnas_transaccion)
 usuarios_df = pd.DataFrame(columns=columnas_usuarios)
 consultas_df = pd.DataFrame(columns=columnas_consultas)
