@@ -25,6 +25,13 @@ def safe_float(value):
     except (ValueError, TypeError):
         return None
 
+def pad_str_with_zero(value):
+    if pd.isna(value):
+        return None
+    val = str(value)
+    return val if len(val) > 1 else f"0{val}"
+
+
 st.set_page_config(page_title="Convertidor Excel a JSON", layout="centered")
 st.title("🧾 Convertidor Excel a JSON de Facturas")
 
@@ -55,12 +62,12 @@ def crear_json_desde_excel(file):
             "tipoDocumentoIdentificacion": usuario_row["tipoDocumentoIdentificacion"],
             "numDocumentoIdentificacion": num_doc,
             "consecutivo": idx + 1,
-            "tipoUsuario": usuario_row["tipoUsuario"],
+            "tipoUsuario": pad_str_with_zero(usuario_row["tipoUsuario"]),
             "fechaNacimiento": str(usuario_row["fechaNacimiento"]),
             "codSexo": usuario_row["codSexo"],
             "codPaisResidencia": str(usuario_row["codPaisResidencia"]),
             "codMunicipioResidencia": str(usuario_row["codMunicipioResidencia"]),
-            "codZonaTerritorialResidencia": str(usuario_row["codZonaTerritorialResidencia"]),
+            "codZonaTerritorialResidencia": pad_str_with_zero(usuario_row["codZonaTerritorialResidencia"]),
             "incapacidad": usuario_row["incapacidad"],
             "codPaisOrigen": str(usuario_row["codPaisOrigen"]),
             "servicios": {},
@@ -74,22 +81,24 @@ def crear_json_desde_excel(file):
                     "codPrestador": str(consulta_row["codPrestador"]),
                     "fechaInicioAtencion": str(consulta_row["fechaInicioAtencion"]),
                     "codConsulta": str(consulta_row["codConsulta"]),
-                    "modalidadGrupoServicioTecSal": str(consulta_row["modalidadGrupoServicioTecSal"]),
+                    "modalidadGrupoServicioTecSal": pad_str_with_zero(consulta_row["modalidadGrupoServicioTecSal"]),
                     "codServicio": safe_int(consulta_row["codServicio"]),
-                    "grupoServicios": str(consulta_row["grupoServicios"]),
+                    "grupoServicios": pad_str_with_zero(consulta_row["grupoServicios"]),
                     "finalidadTecnologiaSalud": str(consulta_row["finalidadTecnologiaSalud"]),
                     "causaMotivoAtencion": str(consulta_row["causaMotivoAtencion"]),
-                    "tipoDiagnosticoPrincipal": str(consulta_row["tipoDiagnosticoPrincipal"]),
+                    "tipoDiagnosticoPrincipal": pad_str_with_zero(consulta_row["tipoDiagnosticoPrincipal"]),
                     "tipoDocumentoIdentificacion": str(consulta_row["tipoDocumentoIdentificacion"]),
-                    "conceptoRecaudo": str(consulta_row["conceptoRecaudo"]),
-                    "vrServicio": int(float(consulta_row["vrServicio"])),
-                    "numDocumentoIdentificacion": str(consulta_row["numDocumentoIdentificacion"]),
-                    "valorPagoModerador": int(float(consulta_row["valorPagoModerador"])),
-                    "numFEVPagoModerador": str(consulta_row["numFEVPagoModerador"]) if pd.notnull(consulta_row["numFEVPagoModerador"]) else "",
+                    "conceptoRecaudo": pad_str_with_zero(consulta_row["conceptoRecaudo"]),
+                    "vrServicio": safe_int(consulta_row["vrServicio"]),
+                    "numDocumentoIdentificacion": str(consulta_row["cedulaDoctor"]),
+                    "valorPagoModerador": safe_int(consulta_row["valorPagoModerador"]),
+                    "numFEVPagoModerador": str(consulta_row["numFEVPagoModerador"]) if pd.notnull(
+                        consulta_row["numFEVPagoModerador"]) else "",
                     "consecutivo": i + 1,
                     "codDiagnosticoPrincipal": str(consulta_row["codDiagnosticoPrincipal"]),
-                    "codDiagnosticoRelacionado1": str(consulta_row["codDiagnosticoRelacionado1"])
+                    "codDiagnosticoRelacionado1": str(consulta_row["codDiagnosticoRelacionado1"]),
                 }
+
                 usuario["servicios"]["consultas"].append(consulta)
 
         user_procedimientos = procedimientos_df[procedimientos_df["numDocumentoIdentificacion"].astype(str) == num_doc]
@@ -99,25 +108,29 @@ def crear_json_desde_excel(file):
                 procedimiento = {
                     "codPrestador": str(procedimiento_row["codPrestador"]),
                     "fechaInicioAtencion": str(procedimiento_row["fechaInicioAtencion"]),
-                    "idMIPRES": str(procedimiento_row["idMIPRES"]) if pd.notnull(procedimiento_row["idMIPRES"]) else None,
-                    "numAutorizacion": str(procedimiento_row["numAutorizacion"]) if pd.notnull(procedimiento_row["numAutorizacion"]) else None,
+                    "idMIPRES": str(procedimiento_row["idMIPRES"]) if pd.notnull(
+                        procedimiento_row["idMIPRES"]) else None,
+                    "numAutorizacion": str(procedimiento_row["numAutorizacion"]) if pd.notnull(
+                        procedimiento_row["numAutorizacion"]) else None,
                     "codProcedimiento": str(procedimiento_row["codProcedimiento"]),
                     "viaIngresoServicioSalud": str(procedimiento_row["viaIngresoServicioSalud"]),
-                    "modalidadGrupoServicioTecSal": str(procedimiento_row["modalidadGrupoServicioTecSal"]),
-                    "grupoServicios": str(procedimiento_row["grupoServicios"]),
-                    "codServicio": int(procedimiento_row["codServicio"]),
+                    "modalidadGrupoServicioTecSal": pad_str_with_zero(procedimiento_row["modalidadGrupoServicioTecSal"]),
+                    "grupoServicios": pad_str_with_zero(procedimiento_row["grupoServicios"]),
+                    "codServicio": safe_int(procedimiento_row["codServicio"]),
                     "finalidadTecnologiaSalud": str(procedimiento_row["finalidadTecnologiaSalud"]),
                     "tipoDocumentoIdentificacion": str(procedimiento_row["tipoDocumentoIdentificacion"]),
-                    "numDocumentoIdentificacion": str(procedimiento_row["numDocumentoIdentificacion"]),
+                    "numDocumentoIdentificacion": str(procedimiento_row["cedulaDoctor"]),
                     "codDiagnosticoPrincipal": str(procedimiento_row["codDiagnosticoPrincipal"]),
                     "codDiagnosticoRelacionado": str(procedimiento_row["codDiagnosticoRelacionado"]),
                     "codComplicacion": str(procedimiento_row["codComplicacion"]),
-                    "vrProcedimiento": int(float(procedimiento_row["vrProcedimiento"])),
+                    "vrProcedimiento": safe_int(procedimiento_row["vrProcedimiento"]),
                     "tipoPagoModerador": str(procedimiento_row["tipoPagoModerador"]),
-                    "valorPagoModerador": int(float(procedimiento_row["valorPagoModerador"])),
-                    "numFEVPagoModerador": str(procedimiento_row["numFEVPagoModerador"]) if pd.notnull(procedimiento_row["numFEVPagoModerador"]) else None,
+                    "valorPagoModerador": safe_int(procedimiento_row["valorPagoModerador"]),
+                    "numFEVPagoModerador": str(procedimiento_row["numFEVPagoModerador"]) if pd.notnull(
+                        procedimiento_row["numFEVPagoModerador"]) else None,
                     "consecutivo": j + 1
                 }
+
                 usuario["procedimientos"].append(procedimiento)
 
         resultado["usuarios"].append(usuario)
@@ -140,7 +153,7 @@ columnas_consultas = [
     "codServicio", "grupoServicios", "finalidadTecnologiaSalud", "causaMotivoAtencion",
     "tipoDiagnosticoPrincipal", "tipoDocumentoIdentificacion", "conceptoRecaudo",
     "vrServicio", "numDocumentoIdentificacion", "valorPagoModerador", "numFEVPagoModerador",
-    "codDiagnosticoPrincipal", "codDiagnosticoRelacionado1"
+    "codDiagnosticoPrincipal", "codDiagnosticoRelacionado1", "cedulaDoctor"
 ]
 
 columnas_procedimientos = [
@@ -149,7 +162,7 @@ columnas_procedimientos = [
     "grupoServicios", "codServicio", "finalidadTecnologiaSalud", "tipoDocumentoIdentificacion",
     "numDocumentoIdentificacion", "codDiagnosticoPrincipal", "codDiagnosticoRelacionado",
     "codComplicacion", "vrProcedimiento", "tipoPagoModerador", "valorPagoModerador",
-    "numFEVPagoModerador"
+    "numFEVPagoModerador", "cedulaDoctor"
 ]
 
 transaccion_df = pd.DataFrame(columns=columnas_transaccion)
